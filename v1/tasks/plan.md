@@ -7,4 +7,4 @@
 - [x] Conflict-aware schedule preview/approval, calendar editing and exports.
 - [x] Credentials checked: no established auth or AI provider available; integrations explicitly deferred.
 - [x] Final browser/accessibility verification and presentation polish. See docs/VALIDATION.md.
-- [ ] Feature branch push and pull request (API access may be restricted).
+- [x] Feature branch `feature/opportunity-to-action` pushed. PR creation attempted; GitHub GraphQL API returned Forbidden. Prepared description: `docs/PULL_REQUEST.md`. Review/create: https://github.com/ForMyWebsite/Congressional-APP-Challenge-2026-2027/compare/main...feature/opportunity-to-action?expand=1
