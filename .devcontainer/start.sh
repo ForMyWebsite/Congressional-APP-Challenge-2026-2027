@@ -7,7 +7,8 @@ fi
 if [[ -n "${CODESPACE_NAME:-}" && -n "${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-}" ]]; then
   export APP_ORIGIN="https://${CODESPACE_NAME}-5173.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
 fi
-nohup npm run dev >/tmp/acadia-dev.log 2>&1 </dev/null &
+# Start a separate session so lifecycle-shell hangups cannot reach the servers.
+nohup setsid npm run dev >/tmp/acadia-dev.log 2>&1 </dev/null &
 for attempt in {1..60}; do
   if curl --fail --silent http://localhost:5173/ >/dev/null && curl --fail --silent http://localhost:3001/api/health >/dev/null; then
     echo 'Acadia is running. Open port 5173 from the Ports tab.'
