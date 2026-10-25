@@ -2,7 +2,15 @@
 
 The application lives in [`v1/`](v1/).
 
-## View the app
+## Open without installing anything
+
+[Create an Acadia Codespace](https://codespaces.new/ForMyWebsite/Congressional-APP-Challenge-2026-2027?ref=main)
+
+Click **Create codespace**. Setup installs Node and dependencies in the cloud and starts the app automatically. Once ready, open the **Ports** tab and click the browser icon beside **5173**. Keep that port private. If you already have a Codespace, pull the latest main and run **Codespaces: Rebuild Container** from the command palette.
+
+The app runs while the Codespace is running. It is a development workspace, not permanent public hosting. GitHub may require available Codespaces quota.
+
+## View the app locally
 
 Install Node.js 24 or newer, clone this repository, and open the repository in VS Code. In the terminal run:
 
