@@ -4,18 +4,12 @@
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/v1",
   "postCreateCommand": "npm ci --ignore-scripts --no-fund",
   "postStartCommand": "bash ../.devcontainer/start.sh",
-  "forwardPorts": [
-    5173
-  ],
+  "forwardPorts": [5173],
   "portsAttributes": {
     "5173": {
       "label": "Acadia Edu \u2014 open app",
       "onAutoForward": "openBrowser",
       "visibility": "private"
-    },
-    "3001": {
-      "label": "Internal API",
-      "onAutoForward": "ignore"
     }
   },
   "remoteUser": "node"

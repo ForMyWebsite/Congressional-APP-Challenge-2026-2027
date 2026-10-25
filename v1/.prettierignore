@@ -4,3 +4,7 @@ dist
 test-results
 playwright-report
 package-lock.json
+
+.next
+next-env.d.ts
+*.tsbuildinfo

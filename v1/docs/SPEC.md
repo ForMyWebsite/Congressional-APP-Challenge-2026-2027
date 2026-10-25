@@ -1,39 +1,27 @@
-# Acadia Edu: first working release
+# Acadia Edu — opportunity, with a way forward
 
-A responsive student web app that gives students a clear view of their day and affordable opportunities. VS Code and Node 24 are the development baseline.
+This release replaces the initial demo dashboard with a Next.js App Router + Tailwind student opportunity planner, focused on Pennsylvania grades 9–12. It stays in `v1/` and retains port 5173 and detached Codespaces startup. No extra agents are used.
 
-## Capabilities and build order
+## Shared capability contracts and order
 
-| Module    | Responsibility                                                            | Depends on                  |
-| --------- | ------------------------------------------------------------------------- | --------------------------- |
-| student   | Demo, local email/password accounts, editable goals and school profile    | —                           |
-| planner   | Dated tasks, calendar events, daily completion, reminders                 | student                     |
-| discovery | Curated opportunity directory, transparent interest matching, saved items | student                     |
-| guidance  | Local contextual planning suggestions; optional server-side OpenAI        | student, planner, discovery |
+1. `src/domain/models.ts`: StudentProfile, Opportunity/SourceEvidence, MatchExplanation, SavedPathway/PreparationStep, ScheduledTask and versioned Workspace.
+2. Profile: optional answers and review; validated device-local guest persistence, recoverable imports, exports, deletion. No records seeded into the student's planner.
+3. Catalogue: real unreviewed links separated from fictional demo records; every unknown explicit. Official sources are inaccessible through this execution environment's network (403), so no source review or live application status is claimed.
+4. Matching: separate interests, apparent consistency, mismatches, missing info and questions; browse beyond matches.
+5. Pathways: typed sourced requirements, optional suggestions and confirmation questions; dependency-aware completion and reset; student targets and self-reported status.
+6. Scheduling: deterministic dependency order, time budgets, existing commitments, America/New_York dates, preview and explicit approval, edit/remove/complete/reschedule and ICS export.
+7. Integration status, responsive UI, automated tests and documentation.
 
-Build student → planner → discovery → guidance. School data is self-reported. This release does not verify email, import report cards, connect school systems, send email/push notifications, or provide person-to-person messaging. The inbox is an in-app reminder center. Never present sample deadlines or demo data as live school information.
+## Acceptance
 
-## Acceptance criteria
+A guest chooses grade/location/interests/free preference, explores an explicitly labeled engineering example, reads sample evidence, saves a pathway, chooses a target date, previews sessions around their commitments, approves, reloads, and continues. Real organizer links remain available with unreviewed/unknown information. Demo examples cannot masquerade as source-reviewed programs. A real source-checked journey awaits official-source access and review.
 
-- Dashboard renders with a clearly labeled sample profile and responsive navigation.
-- Demo tasks, events, bookmarks and profile persist on the current browser; account data persists in SQLite and is isolated by session.
-- Student can add/complete/delete tasks, add calendar events, browse months, filter/save opportunities, read reminders and edit a profile.
-- Sign-up/login uses email and password. School email is encouraged, never required. School affiliation is editable and unverified.
-- Personalized guidance explains its basis. Live AI requires a server credential; fallback is explicitly labeled. No student email, name, school or grades are sent to the AI provider.
-- Profile export and deletion work. No school passwords or report cards are collected.
-- TypeScript, production build, API/domain tests, and browser flows pass.
+Established authentication, cross-device sync, school imports, external reminders and live AI are deferred without credentials/permissions. No custom account simulation is offered. Preserve `.data/acadia.sqlite` from the previous release; legacy accounts are not deleted or silently presented as guests' imported data.
 
-## Commands and structure
+## Commands / layout
 
-`npm ci`, `npm run dev`, `npm run check`, `npm run test:e2e`, `npm start` (after build).
-`src/` React UI and shared domain types; `server/` Express, SQLite, sessions; `tests/` Node and Playwright tests; `docs/` operating and product context.
+`npm ci`, `npm run dev`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, `npm run test:e2e`. `src/app` App Router; `src/components` presentation; `src/domain` pure business rules and runtime contracts; `src/data` catalogue/evidence; `src/lib` persistence and exports; `tests` unit/integration/browser checks.
 
 ## Standards
 
-Strict TypeScript, named focused components, native form validation plus Zod at the API boundary. Example: `const remaining = tasks.filter(task => !task.done);`. React encodes all rendered text. Native controls, visible focus, dialog focus management, semantic headings and reduced motion support.
-
-Always preserve failing checks and keep secrets on the server. Changes to real school connections, student data retention, external messaging or production authentication require a separate implementation review. Never claim demo data is verified or promise educational outcomes.
-
-## Production requirements
-
-Verified email and password recovery, school-approved OAuth/API credentials, deployment with HTTPS and persistent database backups, a privacy/consent policy suitable for student ages and jurisdiction, account abuse controls backed by shared storage if scaling, and operational monitoring. These are remaining launch work, not working features.
+Strict TypeScript and Zod. Small named components, native controls, focus management, visible focus and reduced motion. Always run checks, retain failing tests and show uncertainty. Never infer student ability/income from school, collect school passwords, fabricate sourced facts, put secrets in public variables, or save schedules without approval. Production identity, school permissions, data protection and legal requirements need qualified review before student launch.

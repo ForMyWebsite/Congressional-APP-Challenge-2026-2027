@@ -1,32 +1,29 @@
-# Building Acadia together in VS Code
+# Two developers, one understandable application
 
-## First shared commit
+Use separate Git branches from the latest reviewed main. Work inside `v1/`. Both developers use the same checked-in lockfile, `npm ci --ignore-scripts`, and `AGENTS.md`. Codespaces are already isolated; no extra worktree is needed. Do not spawn extra agents or edit the other developer's active files without instruction.
 
-The app files are created but are not automatically committed or pushed. Review them, then use VS Code's Source Control panel to create the first commit and push a `main` branch to the shared GitHub repository. Invite your friend as a repository collaborator. Never include `.env`, `.data/`, `node_modules/`, exported student data, or private records.
+## Shared contracts first
 
-Each teammate then clones the repository, runs `npm ci`, and starts `npm run dev`. Both can use the Codex extension independently.
+`src/domain/models.ts` defines StudentProfile, Opportunity and SourceEvidence, MatchExplanation, SavedPathway and PreparationStep, ScheduledTask, and Workspace. Treat these as the shared interface. Discuss changes to fields, nullable states, provenance, dependency semantics and storage versions before implementation. Make a contract/schema/test PR first when both developers depend on it.
 
-## Divide work by files
+| Ownership                 | Files and responsibilities                                                                             |
+| ------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Developer A               | ProfileWizard, Today, Planner, timezone/calendar interactions                                          |
+| Developer B               | Catalogue/evidence, Discover, matching, Pathways                                                       |
+| Shared — coordinate first | models, persistence/schema migration, WorkspaceApp, auth/integrations, shared CSS and package/lockfile |
 
-A practical first split:
+## Small reviewable tasks
 
-- Teammate A: planner and dashboard interaction improvements.
-- Teammate B: verified authentication or an approved school integration.
+- A: improve an onboarding answer's help text; verify skipped/reviewed answers and keyboard focus.
+- A: improve the calendar day view; verify a task can be edited/rescheduled/exported without duplication.
+- B: review one official program source; add only supported fields and provenance; test unknown/expired states.
+- B: improve one pathway dependency interaction; verify prerequisite rejection and transitive reset.
+- Shared: add provider authentication only after credentials/permissions exist, with migrations and cross-user authorization tests.
 
-Before a session, agree on the files each person owns. `src/App.tsx` is shared workflow code, so coordinate changes to it rather than editing it independently at the same time. Extract a feature into a focused component when that helps avoid overlap; don't add abstraction simply for a possible future feature.
+Avoid simultaneous changes to shared CSS or schema. Commit coherent changes, push a feature branch, open a pull request and have the other person review the code and checks. Never force-push over each other or merge while the other's unreviewed changes are in the working tree. VS Code Live Share is optional pairing, not a substitute for Git review.
 
-For each change, create a named branch from updated `main`, for example `feature/planner-reminders`. Tell Codex the objective and acceptance criteria, such as:
+## A useful Codex task
 
-> Read AGENTS.md and docs/SPEC.md. Add a task filter to the planner. Keep authentication and school connections unchanged. Work in the planner files only. Run npm run check and the relevant browser tests. Explain what changed and any limitations.
+> Read AGENTS.md and the relevant shared types. Change only the agreed feature files. Keep unknown source fields unknown, preserve user data, and run npm run check plus relevant browser checks. Explain the behavior, evidence and limitations. Do not add agents or modify the other developer's files.
 
-Push your branch and open a pull request. The other teammate reviews it, confirms checks, and merges. Update `main` locally before starting the next branch. Don't share a single branch for simultaneous Codex sessions, force-push over each other, or commit while the other session is changing those same files.
-
-## Live pairing
-
-VS Code Live Share is useful when one person drives and the other reviews. It shares an editing session; it does not replace commits, pull requests or branch coordination. Keep terminals containing credentials private.
-
-## What to ask your school
-
-Ask a school administrator whether a student project can obtain a sandbox or approved developer access to Schoology or Alma. Ask which official authentication flow, scopes, API endpoints, retention rules and consent requirements apply. Use a test school and test student data. Do not collect passwords or scrape authenticated student portals.
-
-Keep the first competition demo focused: create a student profile → add a goal → plan a day → discover an accessible opportunity → explain the recommendation. Clearly label sample data and the limits of the guide.
+Do not commit `.env`, `.data/`, browser exports, logs, screenshots with real student data, `node_modules/` or build outputs. The implementation branch is `feature/opportunity-to-action`; review it before merging.
