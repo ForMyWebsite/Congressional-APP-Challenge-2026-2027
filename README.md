@@ -23,3 +23,5 @@ npm run dev
 Open **http://localhost:5173** in your browser while the terminal stays running. Start with the sample workspace or create a test account. GitHub displays the source code; it does not automatically host this full-stack app.
 
 See [app documentation](v1/README.md) and [working together](v1/docs/COLLABORATING.md).
+
+If an older Codespace opens in recovery mode with `node: command not found`, run `git pull origin main`, then use **Codespaces: Rebuild Container**. The configuration uses the official `node:24-bookworm` image.
