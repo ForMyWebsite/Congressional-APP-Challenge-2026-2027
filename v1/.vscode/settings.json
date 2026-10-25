@@ -1,0 +1,11 @@
+{
+  "editor.tabSize": 2,
+  "files.insertFinalNewline": true,
+  "files.exclude": { "**/.data": true },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/test-results": true,
+    "**/playwright-report": true
+  }
+}
