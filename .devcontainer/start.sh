@@ -3,10 +3,10 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/../v1"
 healthy() {
   curl --fail --silent --max-time 5 http://127.0.0.1:5173/api/health |
-    node -e 'let body="";process.stdin.on("data", chunk=>body+=chunk);process.stdin.on("end",()=>{try{const value=JSON.parse(body);process.exit(value.status==="ok" && value.appVersion===2?0:1);}catch{process.exit(1);}});'
+    node -e 'let body="";process.stdin.on("data", chunk=>body+=chunk);process.stdin.on("end",()=>{try{const value=JSON.parse(body);process.exit(value.status==="ok" && value.appVersion===3?0:1);}catch{process.exit(1);}});'
 }
 if healthy 2>/dev/null; then
-  echo 'Acadia v2 is already running. Open port 5173.'
+  echo 'Acadia v3 is already running. Open port 5173.'
   exit 0
 fi
 if curl --silent --max-time 3 -o /dev/null http://127.0.0.1:5173/; then

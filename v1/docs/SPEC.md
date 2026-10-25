@@ -1,3 +1,5 @@
+> Current extension: read [MAX-SPEC.md](MAX-SPEC.md) and [SETUP-MAX.md](SETUP-MAX.md). The newest user request adds live AI, established accounts, consent-based grades/screenshots and Max rewards; those requests supersede the earlier deferred scope below.
+
 # Acadia Edu — opportunity, with a way forward
 
 This release replaces the initial demo dashboard with a Next.js App Router + Tailwind student opportunity planner, focused on Pennsylvania grades 9–12. It stays in `v1/` and retains port 5173 and detached Codespaces startup. No extra agents are used.

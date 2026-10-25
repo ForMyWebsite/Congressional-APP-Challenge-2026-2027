@@ -6,7 +6,7 @@ The application is in [`v1/`](v1/). It now uses Next.js App Router, TypeScript a
 
 ## Open without installing Node on your computer
 
-Use [GitHub Codespaces](https://codespaces.new/ForMyWebsite/Congressional-APP-Challenge-2026-2027?ref=feature%2Fopportunity-to-action) on the `feature/opportunity-to-action` branch (or on main after the update is reviewed and merged). Setup installs tools in the cloud and starts the app. Open **Ports → 5173 → Open in Browser**. Keep that port private.
+Use [GitHub Codespaces](https://codespaces.new/ForMyWebsite/Congressional-APP-Challenge-2026-2027?ref=feature%2Fmax-school-planner) on the `feature/max-school-planner` branch (or on main after the update is reviewed and merged). Setup installs tools in the cloud and starts the app. Open **Ports → 5173 → Open in Browser**. Keep that port private.
 
 Already running an older version? Export any old planner data first. Update to the intended branch, run `npm ci --ignore-scripts` inside `v1/`, then stop and restart the Codespace to replace the old server. See [Codespaces details](v1/README.md#browser-only-github-codespaces). No repeated container rebuild is needed for ordinary source changes.
 
@@ -24,6 +24,6 @@ Open the local address printed in the terminal (port 5173). GitHub stores source
 
 ## Try it honestly
 
-Create a guest profile, discover a starting point, read its sources/unknowns, save a pathway, add schoolwork, preview preparation sessions and approve. Fictional examples are separated in Demo studio. Real organizer sources could not be reviewed through the execution environment's network, so those records explicitly retain unknown costs, eligibility, deadlines and availability. No login, live AI, school import or external reminder delivery is simulated.
+Create a guest profile, discover a starting point, read its sources/unknowns, save a pathway, add schoolwork, preview preparation sessions and approve. Fictional examples are separated in Demo studio. Real organizer sources could not be reviewed through the execution environment's network, so those records explicitly retain unknown costs, eligibility, deadlines and availability. Max supports real free-only OpenRouter calls and Supabase Google/email accounts when configured. School APIs are not simulated. See [Max setup](v1/docs/SETUP-MAX.md) for secrets, SQL and redirects.
 
 [Architecture](v1/docs/ARCHITECTURE.md) · [Collaboration](v1/docs/COLLABORATING.md) · [Source findings](v1/docs/SOURCES.md) · [Feature status](v1/docs/ROADMAP.md) · [Usability guide](v1/docs/USABILITY.md) · [Competition demo outline](v1/docs/DEMO.md)

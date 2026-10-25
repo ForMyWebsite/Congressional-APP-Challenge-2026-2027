@@ -61,7 +61,7 @@ function memory() {
 
 test('new guest planner contains no invented assignments or achievements', () => {
   const state = emptyWorkspace();
-  assert.equal(state.version, 2);
+  assert.equal(state.version, 3);
   assert.equal(state.profile.grade, null);
   assert.deepEqual(state.tasks, []);
   assert.deepEqual(state.pathways, []);

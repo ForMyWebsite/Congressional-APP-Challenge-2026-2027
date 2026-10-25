@@ -19,6 +19,7 @@ import { previewSchedule, type SchedulePreview } from '../domain/scheduling';
 import { addDays, prettyDate, todayKey } from '../domain/dates';
 import type { Opportunity, SavedPathway, Workspace } from '../domain/models';
 import { Modal } from './Modal';
+import { allTasks } from '../domain/school';
 import { OpportunityDetails } from './Discover';
 export function Pathways({
   workspace,
@@ -177,7 +178,11 @@ export function Pathways({
                       result: previewSchedule(
                         path,
                         workspace.profile,
-                        workspace.tasks,
+                        allTasks(
+                          workspace,
+                          addDays(todayKey(), 1),
+                          path.targetDate || addDays(todayKey(), 1),
+                        ),
                         addDays(todayKey(), 1),
                       ),
                     })

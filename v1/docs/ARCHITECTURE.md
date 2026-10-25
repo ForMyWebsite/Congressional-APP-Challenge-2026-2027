@@ -1,3 +1,9 @@
+# Current Max extension
+
+Read [SETUP-MAX.md](SETUP-MAX.md) for live configuration. `Entry` provides the welcome/auth gate. Supabase browser/SSR clients handle established identity; `/api/workspace` validates data and session ownership, while SQL RLS and a revision-checked invoker function isolate saves. `useWorkspace` keeps account/guest state separate and stops on conflicts. `server/provider.ts` supports OpenRouter free-only routing or explicitly chosen OpenAI; `api/max` and `api/extract` enforce consent/size/access boundaries. `MaxGuide` presents real responses with approved task proposals. `SchoolSetup` handles manual/recurring data and reviewed extraction. Shared schema v3 migrates old v2 browser records. Pet rules are pure and idempotent for task rewards; coins are cosmetic. Do not claim live auth/model/SQL validation until the provider project is configured and exercised.
+
+The earlier core walkthrough remains below; references to unconnected AI/account code describe the pre-Max release and are superseded by this section.
+
 # Architecture and code walkthrough
 
 ## Why this shape

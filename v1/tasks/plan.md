@@ -8,3 +8,12 @@
 - [x] Credentials checked: no established auth or AI provider available; integrations explicitly deferred.
 - [x] Final browser/accessibility verification and presentation polish. See docs/VALIDATION.md.
 - [x] Feature branch `feature/opportunity-to-action` pushed. PR creation attempted; GitHub GraphQL API returned Forbidden. Prepared description: `docs/PULL_REQUEST.md`. Review/create: https://github.com/ForMyWebsite/Congressional-APP-Challenge-2026-2027/compare/main...feature/opportunity-to-action?expand=1
+
+## Max extension
+
+- [x] Shared schema v3 migration, manual grades/classes, recurrence and pet rules.
+- [x] Welcome, established-provider auth/client/server boundaries, RLS migration and conflict-safe persistence.
+- [x] Real provider adapters, free-only OpenRouter guard, consent and reviewed image extraction.
+- [x] Interactive Max/history, approved suggestions, pet shop and reminders, four calendar views.
+- [x] Tests/docs and visual review. Live credentials, real provider responses and database isolation execution remain external setup steps.
+- [x] Prepare feature/max-school-planner for review. Provider credentials and Supabase SQL setup remain external prerequisites; see docs/SETUP-MAX.md.

@@ -15,7 +15,16 @@ import { completeStep } from '../domain/pathways';
 import type { Workspace } from '../domain/models';
 import type { Dispatch, SetStateAction } from 'react';
 import { Scenery } from './Scenery';
-export type Section = 'Today' | 'Discover' | 'My Pathways' | 'Calendar' | 'Profile & Settings';
+export type Section =
+  | 'Today'
+  | 'Discover'
+  | 'My Pathways'
+  | 'Calendar'
+  | 'Profile & Settings'
+  | 'School & Classes'
+  | 'Ask Max'
+  | 'Max & Rewards'
+  | 'Reminders';
 export function Today({
   workspace,
   update,
@@ -126,6 +135,13 @@ export function Today({
           <ArrowRight size={20} />
         </button>
       </section>
+      <button className="max-nudge" onClick={() => navigate('Ask Max')}>
+        <span>
+          <strong>A little help from Max?</strong>
+          <small>Ask for study tips, club pros and cons, or a plan for an upcoming exam.</small>
+        </span>
+        <ArrowRight size={19} />
+      </button>
       <div className="today-grid">
         <section className="panel">
           <div className="section-heading">

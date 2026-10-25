@@ -1,3 +1,11 @@
+# Max update status
+
+Implemented: real provider adapters with free-only OpenRouter mode; welcome and Supabase Google/email account flows; authenticated API/database migration and revision checks; manual school/courses/periods/grades; reviewed screenshot import; recurring classes/clubs; Day/Week/Month/Year calendars; reminders; Max chat/history and approved task suggestions; pet coins, shop, feeding and v2→v3 migration.
+
+Requires external setup: OpenRouter (or deliberately selected paid OpenAI) credentials and a supported model; Supabase project/public configuration, SQL migration and Google/email settings. These live integrations and the supplied RLS isolation SQL have not been exercised without credentials. Free vision models may be unavailable. Schoology/Alma still need official school arrangements and APIs. Public launch still requires privacy/consent, provider terms, recovery/deletion and operational review.
+
+Earlier core delivery and remaining research work:
+
 # Implemented, demonstration, and deferred
 
 ## Implemented

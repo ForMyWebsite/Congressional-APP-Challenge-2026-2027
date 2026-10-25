@@ -136,9 +136,65 @@ export const taskSchema = z
     'Tasks must finish within the selected day.',
   );
 export type ScheduledTask = z.infer<typeof taskSchema>;
-export const workspaceSchema = z
+export const courseSchema = z.object({
+  id: z.string().min(1).max(100),
+  name: z.string().trim().min(1).max(100),
+  period: z.string().max(30),
+  grade: z.string().max(20),
+});
+export const recurringSchema = z
   .object({
-    version: z.literal(2),
+    id: z.string().min(1).max(100),
+    title: z.string().trim().min(1).max(150),
+    category: z.enum(['Class', 'Club']),
+    weekdays: z.array(z.number().int().min(0).max(6)).min(1).max(7),
+    time: timeSchema,
+    minutes: z.number().int().min(5).max(180),
+    startDate: dateSchema,
+    endDate: dateSchema,
+  })
+  .refine((r) => r.endDate >= r.startDate, 'End date must follow the start date.')
+  .refine(
+    (r) => Number(r.time.slice(0, 2)) * 60 + Number(r.time.slice(3)) + r.minutes <= 1440,
+    'Commitments must finish within the day.',
+  );
+export const schoolSchema = z.object({
+  name: z.string().trim().max(150),
+  courses: z.array(courseSchema).max(30),
+  commitments: z.array(recurringSchema).max(100),
+  setupDone: z.boolean(),
+});
+export type SchoolData = z.infer<typeof schoolSchema>;
+export type RecurringCommitment = z.infer<typeof recurringSchema>;
+export const petSchema = z.object({
+  coins: z.number().int().min(0).max(1000000),
+  rewardedTaskIds: z.array(z.string().max(100)).max(20000),
+  owned: z.array(z.enum(['bandana', 'cap', 'glasses'])).max(3),
+  equipped: z.enum(['bandana', 'cap', 'glasses']).nullable(),
+  energy: z.number().int().min(0).max(100),
+});
+export const emptySchool = (): SchoolData => ({
+  name: '',
+  courses: [],
+  commitments: [],
+  setupDone: false,
+});
+export const emptyPet = () => ({
+  coins: 0,
+  rewardedTaskIds: [] as string[],
+  owned: [] as ('bandana' | 'cap' | 'glasses')[],
+  equipped: null as 'bandana' | 'cap' | 'glasses' | null,
+  energy: 60,
+});
+const workspaceV3 = z
+  .object({
+    version: z.literal(3),
+    school: schoolSchema.default(emptySchool),
+    pet: petSchema.default(emptyPet),
+    maxChat: z
+      .array(z.object({ role: z.enum(['user', 'assistant']), content: z.string().max(12000) }))
+      .max(40)
+      .default([]),
     profile: profileSchema,
     onboarded: z.boolean(),
     pathways: z.array(pathwaySchema).max(50),
@@ -160,10 +216,18 @@ export const workspaceSchema = z
       )
         ctx.addIssue({ code: 'custom', message: 'A task refers to a missing pathway step.' });
   });
+export const workspaceSchema = z.preprocess((value) => {
+  if (value && typeof value === 'object' && 'version' in value && value.version === 2)
+    return { ...value, version: 3 };
+  return value;
+}, workspaceV3);
 export type Workspace = z.infer<typeof workspaceSchema>;
 export function emptyWorkspace(): Workspace {
   return {
-    version: 2,
+    version: 3,
+    school: emptySchool(),
+    pet: emptyPet(),
+    maxChat: [],
     profile: {
       nickname: '',
       grade: null,

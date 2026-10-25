@@ -13,6 +13,10 @@ import {
   Settings2,
   ShieldCheck,
   X,
+  Sparkles,
+  GraduationCap,
+  Heart,
+  Bell,
 } from 'lucide-react';
 import { useWorkspace } from '../lib/useWorkspace';
 import { download } from '../lib/exports';
@@ -25,16 +29,28 @@ import { Planner } from './Planner';
 import { Settings } from './Settings';
 import { Modal } from './Modal';
 import { ProfileWizard } from './ProfileWizard';
+import { MaxGuide } from './MaxGuide';
+import { MaxPet } from './MaxPet';
+import { SchoolSetup } from './SchoolSetup';
+import { Reminders } from './Reminders';
+import { browserSupabase } from '../lib/supabase';
 const navigation = [
   { name: 'Today', icon: LayoutDashboard },
   { name: 'Discover', icon: Compass },
   { name: 'My Pathways', icon: GitBranch },
   { name: 'Calendar', icon: CalendarDays },
+  { name: 'School & Classes', icon: GraduationCap },
+  { name: 'Ask Max', icon: Sparkles },
+  { name: 'Max & Rewards', icon: Heart },
+  { name: 'Reminders', icon: Bell },
   { name: 'Profile & Settings', icon: Settings2 },
 ] as const;
-export function WorkspaceApp() {
-  const { workspace, update, ready, warning, recovery, reset } = useWorkspace();
-  const [section, setSection] = useState<Section>('Today');
+export function WorkspaceApp({ userId = null }: { userId?: string | null }) {
+  const { workspace, update, ready, warning, recovery, reset, syncStatus, deleteCloud } =
+    useWorkspace(userId);
+  const [selectedSection, setSection] = useState<Section>('Today');
+  const section: Section =
+    userId && ready && !workspace.school.setupDone ? 'School & Classes' : selectedSection;
   const [wizard, setWizard] = useState(false);
   const [demo, setDemo] = useState(false);
   const [notice, setNotice] = useState('');
@@ -176,7 +192,7 @@ export function WorkspaceApp() {
             </span>
             <div>
               <strong>{workspace.profile.nickname || 'Your guest space'}</strong>
-              <small>Device-local · not signed in</small>
+              <small>{userId ? 'Private account' : 'Device-local · guest'}</small>
             </div>
             <ShieldCheck size={16} />
           </div>
@@ -202,18 +218,55 @@ export function WorkspaceApp() {
             <span className="timezone-label">PENNSYLVANIA · GRADES 9–12</span>
             <button className="guest-chip" onClick={() => navigate('Profile & Settings')}>
               <ShieldCheck size={14} />
-              Guest workspace
+              {userId ? 'Your account' : 'Guest workspace'}
             </button>
           </div>
         </header>
         <main id="main-content" ref={main} tabIndex={-1}>
           <div className="guest-banner">
             <span className="green-dot" />
-            <span>Saved in this browser only. No account or school connection.</span>
+            <span>
+              {userId ? syncStatus : 'Saved in this browser only. No account or school connection.'}
+            </span>
             <button onClick={() => navigate('Profile & Settings')}>
               Your data & choices
               <ArrowRight size={12} />
             </button>
+          </div>
+          <div className="session-actions">
+            {userId ? (
+              <button
+                className="text-button"
+                onClick={async () => {
+                  if (syncStatus.includes('Saving') || syncStatus === 'Not saved') {
+                    notify(
+                      'Wait for cloud save to finish, or export your planner before signing out.',
+                    );
+                    return;
+                  }
+                  const result = await browserSupabase()?.auth.signOut();
+                  if (result?.error) {
+                    notify(result.error.message);
+                    return;
+                  }
+                  window.location.reload();
+                }}
+              >
+                Sign out
+              </button>
+            ) : (
+              <button
+                className="text-button"
+                onClick={() => {
+                  try {
+                    sessionStorage.removeItem('acadia-guest');
+                  } catch {}
+                  window.location.reload();
+                }}
+              >
+                Sign in or create account
+              </button>
+            )}
           </div>
           {warning && (
             <div className="storage-warning" role="alert">
@@ -283,12 +336,37 @@ export function WorkspaceApp() {
               {section === 'Calendar' && (
                 <Planner workspace={workspace} update={update} notify={notify} />
               )}{' '}
+              {section === 'School & Classes' && (
+                <SchoolSetup
+                  workspace={workspace}
+                  update={update}
+                  notify={notify}
+                  onComplete={() => {
+                    update((current) => ({
+                      ...current,
+                      school: { ...current.school, setupDone: true },
+                    }));
+                    setWizard(true);
+                  }}
+                />
+              )}
+              {section === 'Ask Max' && (
+                <MaxGuide workspace={workspace} update={update} userId={userId} notify={notify} />
+              )}
+              {section === 'Max & Rewards' && (
+                <MaxPet workspace={workspace} update={update} notify={notify} />
+              )}
+              <div hidden={section !== 'Reminders'}>
+                <Reminders workspace={workspace} />
+              </div>
               {section === 'Profile & Settings' && (
                 <Settings
                   workspace={workspace}
                   update={update}
                   onEdit={profile}
+                  userId={userId}
                   reset={reset}
+                  deleteCloud={deleteCloud}
                   notify={notify}
                 />
               )}
@@ -323,6 +401,7 @@ export function WorkspaceApp() {
             onSave={(profile) => {
               update((current) => ({ ...current, profile, onboarded: true }));
               setWizard(false);
+              navigate('Today');
               notify('Your preferences are saved. You can change direction anytime.');
             }}
           />

@@ -19,7 +19,11 @@ export function Settings({
   onEdit,
   reset,
   notify,
+  userId = null,
+  deleteCloud,
 }: {
+  userId?: string | null;
+  deleteCloud?: () => Promise<void>;
   workspace: Workspace;
   update: Dispatch<SetStateAction<Workspace>>;
   onEdit: () => void;
@@ -91,14 +95,22 @@ export function Settings({
           <ShieldCheck className="settings-icon" size={28} />
           <h2>Your planner stays with you.</h2>
           <p>
-            This is an <strong>unauthenticated guest workspace</strong>. Your profile, pathways, and
-            tasks are stored in this browser’s local storage. They do not synchronize across devices
-            or browsers.
+            This is{' '}
+            {userId ? (
+              <strong>your private cloud workspace</strong>
+            ) : (
+              <strong>an unauthenticated guest workspace</strong>
+            )}
+            . Your profile, pathways, and tasks are{' '}
+            {userId
+              ? 'stored in your private Supabase account.'
+              : 'stored in this browser only and do not sync across devices.'}
           </p>
           <p>
             Clearing site data, using a different browser, or deleting the Codespace’s forwarded
-            origin can make your planner inaccessible. Export a copy regularly. No student data is
-            sent to an AI provider.
+            origin can make a guest planner inaccessible. Export regularly. Questions and optional
+            course grades are sent to the configured AI provider only when you consent to use Max.
+            Screenshot images are sent only when you approve extraction.
           </p>
           <p>
             No exact address, school login, report card, financial document, or health detail is
@@ -107,7 +119,7 @@ export function Settings({
           <div className="settings-actions">
             <button
               className="button secondary"
-              onClick={() => download('acadia-planner-v2.json', JSON.stringify(workspace, null, 2))}
+              onClick={() => download('acadia-planner-v3.json', JSON.stringify(workspace, null, 2))}
             >
               <ArrowDownToLine size={15} />
               Export planner
@@ -158,7 +170,7 @@ export function Settings({
           )}
           <button className="text-button danger" onClick={() => setDeleting(true)}>
             <Trash2 size={14} />
-            Delete guest data
+            {userId ? 'Delete cloud planner' : 'Delete guest data'}
           </button>
         </section>
       </div>
@@ -173,9 +185,9 @@ export function Settings({
         {[
           {
             name: 'Email authentication & cross-device sync',
-            status: 'Not configured',
+            status: userId ? 'Connected' : 'Guest mode',
             detail:
-              'No established authentication provider is connected. Guest mode is not a successful login. Previous local-account data is retained on the development server but is not imported into this planner.',
+              'Supabase provides Google/email authentication and private account storage when configured. Guest mode is never a successful login. Previous local-account data is retained for recovery.',
           },
           {
             name: 'Schoology & Alma',
@@ -184,10 +196,10 @@ export function Settings({
               'Official school agreements, documentation, credentials and permissions are required. Never enter school passwords here. School email alone cannot verify enrollment or authorize records.',
           },
           {
-            name: 'Live AI guide',
-            status: 'Not configured',
+            name: 'Live AI guide · Ask Max',
+            status: 'See Ask Max for connection status',
             detail:
-              'Core matching and scheduling use visible, deterministic rules. No chatbot or simulated model replies. Live AI requires a bounded, consent-based integration and server credentials.',
+              'Ask Max uses a real configured model when the server key is configured, with consent and approval before adding tasks. Screenshot extraction is also available with review. No fake responses are generated.',
           },
           {
             name: 'Email & push reminders',
@@ -215,11 +227,24 @@ export function Settings({
         </p>
       </div>
       {deleting && (
-        <Modal title="Delete this guest workspace?" close={() => setDeleting(false)}>
+        <Modal
+          title={userId ? 'Delete this cloud planner?' : 'Delete this guest workspace?'}
+          close={() => setDeleting(false)}
+        >
           <form
             className="form-stack"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
+              if (userId && deleteCloud) {
+                try {
+                  await deleteCloud();
+                  setDeleting(false);
+                  notify('Cloud planner deleted. Your authentication account remains.');
+                } catch (error) {
+                  notify((error as Error).message);
+                }
+                return;
+              }
               if (!reset()) {
                 notify('Deletion failed. Check the storage warning before trying again.');
                 return;
@@ -231,14 +256,15 @@ export function Settings({
             }}
           >
             <p>
-              This permanently removes your stored profile, pathways, and tasks from this browser.
-              Downloaded files are not deleted. Export first if you want a backup.
+              This permanently removes your stored profile, pathways, tasks, grades, chat history
+              and pet data {userId ? 'from your account' : 'from this browser'}. Downloaded files
+              are not deleted. Export first if you want a backup.
             </p>
             <label className="check-label">
               <input type="checkbox" required />I understand this cannot be undone.
             </label>
             <button className="button danger-button" type="submit">
-              Delete my guest data
+              {userId ? 'Delete my cloud planner' : 'Delete my guest data'}
             </button>
           </form>
         </Modal>

@@ -1,6 +1,9 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { addDays, todayKey } from '../src/domain/dates';
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('acadia-guest', 'true'));
+});
 async function go(page: Page, name: string) {
   await page
     .getByRole('navigation', { name: 'Main navigation' })
@@ -80,7 +83,7 @@ test('complete engineering/free guest journey with schoolwork, schedule approval
   await go(page, 'Profile & Settings');
   const backup = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export planner', exact: true }).click();
-  expect((await backup).suggestedFilename()).toBe('acadia-planner-v2.json');
+  expect((await backup).suggestedFilename()).toBe('acadia-planner-v3.json');
   expect(errors).toEqual([]);
 });
 test('real records show uncertainty; learning resources and demos stay separate', async ({

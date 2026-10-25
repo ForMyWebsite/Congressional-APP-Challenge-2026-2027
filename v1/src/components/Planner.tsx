@@ -16,6 +16,7 @@ import { completeStep } from '../domain/pathways';
 import { preparationOrderConflict, taskConflicts } from '../domain/scheduling';
 import { calendarICS, download } from '../lib/exports';
 import { Modal } from './Modal';
+import { allTasks } from '../domain/school';
 export function TaskForm({
   task,
   date,
@@ -49,7 +50,10 @@ export function TaskForm({
           setError(result.error.issues.map((i) => i.message));
           return;
         }
-        const collisions = taskConflicts(result.data, workspace.tasks);
+        const collisions = taskConflicts(
+          result.data,
+          allTasks(workspace, result.data.date, result.data.date),
+        );
         const order = preparationOrderConflict(
           result.data,
           workspace.pathways.find((p) => p.id === task?.pathwayId),
@@ -157,13 +161,17 @@ export function Planner({
   const today = todayKey();
   const [selected, setSelected] = useState(today);
   const [month, setMonth] = useState(today.slice(0, 7));
+  const [view, setView] = useState('Month');
   const [editing, setEditing] = useState<ScheduledTask | null | false>(false);
   const first = `${month}-01`;
   const gridStart = addDays(first, -((weekday(first) + 6) % 7));
   const days = Array.from({ length: 42 }, (_, index) => addDays(gridStart, index));
-  const dayTasks = workspace.tasks
-    .filter((t) => t.date === selected)
-    .sort((a, b) => a.time.localeCompare(b.time));
+  const calendarTasks = allTasks(workspace, gridStart, addDays(gridStart, 41));
+  const weekStart = addDays(selected, -((weekday(selected) + 6) % 7));
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const dayTasks = allTasks(workspace, selected, selected).sort((a, b) =>
+    a.time.localeCompare(b.time),
+  );
   function moveMonth(delta: number) {
     const date = new Date(`${first}T12:00:00Z`);
     date.setUTCMonth(date.getUTCMonth() + delta);
@@ -212,71 +220,185 @@ export function Planner({
           </button>
         </div>
       </div>
-      <div className="planner-layout">
-        <section className="panel full-calendar">
+      <div className="tabs" aria-label="Calendar views">
+        {['Day', 'Week', 'Month', 'Year'].map((value) => (
+          <button
+            key={value}
+            aria-pressed={view === value}
+            className={view === value ? 'active' : ''}
+            onClick={() => setView(value)}
+          >
+            {value}
+          </button>
+        ))}
+      </div>
+      {view === 'Week' && (
+        <section className="panel week-calendar">
           <div className="section-heading">
-            <h2>
-              {new Date(`${first}T12:00:00Z`).toLocaleDateString('en-US', {
-                timeZone: 'UTC',
-                month: 'long',
-                year: 'numeric',
-              })}
-            </h2>
-            <div className="calendar-tools">
-              <button
-                className="text-button"
-                onClick={() => {
-                  setMonth(today.slice(0, 7));
-                  setSelected(today);
-                }}
-              >
-                Today
-              </button>
-              <button
-                className="icon-button"
-                aria-label="Previous month"
-                onClick={() => moveMonth(-1)}
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <button className="icon-button" aria-label="Next month" onClick={() => moveMonth(1)}>
-                <ChevronRight size={18} />
-              </button>
-            </div>
+            <button
+              className="icon-button"
+              aria-label="Previous week"
+              onClick={() => setSelected(addDays(selected, -7))}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <h2>Week of {prettyDate(weekStart)}</h2>
+            <button
+              className="icon-button"
+              aria-label="Next week"
+              onClick={() => setSelected(addDays(selected, 7))}
+            >
+              <ChevronRight size={18} />
+            </button>
           </div>
-          <div className="month-grid">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-              <span className="day-label" key={day}>
-                {day}
-              </span>
+          <div className="week-columns">
+            {weekDays.map((date) => (
+              <div key={date}>
+                <button
+                  className="text-button"
+                  onClick={() => {
+                    setSelected(date);
+                    setView('Day');
+                  }}
+                >
+                  {prettyDate(date)}
+                </button>
+                {allTasks(workspace, date, date)
+                  .sort((a, b) => a.time.localeCompare(b.time))
+                  .map((task) => (
+                    <article className="week-event" key={task.id}>
+                      <span>
+                        {task.time} · {task.minutes} min
+                      </span>
+                      <strong>{task.title}</strong>
+                    </article>
+                  ))}
+              </div>
             ))}
-            {days.map((date) => {
-              const tasks = workspace.tasks.filter((t) => t.date === date);
+          </div>
+        </section>
+      )}
+      {view === 'Year' && (
+        <section className="panel">
+          <div className="section-heading">
+            <button
+              className="icon-button"
+              aria-label="Previous year"
+              onClick={() => setMonth(`${Number(month.slice(0, 4)) - 1}-01`)}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <h2>{month.slice(0, 4)} · year at a glance</h2>
+            <button
+              className="icon-button"
+              aria-label="Next year"
+              onClick={() => setMonth(`${Number(month.slice(0, 4)) + 1}-01`)}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+          <div className="year-months">
+            {Array.from({ length: 12 }, (_, i) => {
+              const start = `${month.slice(0, 4)}-${String(i + 1).padStart(2, '0')}-01`;
+              const end =
+                i === 11
+                  ? `${month.slice(0, 4)}-12-31`
+                  : addDays(`${month.slice(0, 4)}-${String(i + 2).padStart(2, '0')}-01`, -1);
               return (
                 <button
-                  className={`month-day ${date === selected ? 'selected' : ''} ${date.slice(0, 7) !== month ? 'outside' : ''}`}
-                  key={date}
-                  aria-label={`${date}, ${tasks.length} tasks`}
-                  aria-pressed={date === selected}
-                  onClick={() => setSelected(date)}
+                  key={i}
+                  onClick={() => {
+                    setMonth(start.slice(0, 7));
+                    setSelected(start);
+                    setView('Month');
+                  }}
                 >
-                  <span className={date === today ? 'is-today' : ''}>{Number(date.slice(-2))}</span>
-                  <div>
-                    {tasks.slice(0, 2).map((task) => (
-                      <small
-                        key={task.id}
-                        className={task.category === 'Preparation' ? 'prep' : ''}
-                      >
-                        {task.title}
-                      </small>
-                    ))}
-                    {tasks.length > 2 && <small>+{tasks.length - 2} more</small>}
-                  </div>
+                  <strong>
+                    {new Date(`${start}T12:00:00Z`).toLocaleDateString('en-US', {
+                      month: 'long',
+                      timeZone: 'UTC',
+                    })}
+                  </strong>
+                  <span>{allTasks(workspace, start, end).length} scheduled entries</span>
                 </button>
               );
             })}
           </div>
         </section>
+      )}
+      <div className={`planner-layout ${view !== 'Month' ? 'agenda-layout' : ''}`}>
+        {view === 'Month' && (
+          <section className="panel full-calendar">
+            <div className="section-heading">
+              <h2>
+                {new Date(`${first}T12:00:00Z`).toLocaleDateString('en-US', {
+                  timeZone: 'UTC',
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              </h2>
+              <div className="calendar-tools">
+                <button
+                  className="text-button"
+                  onClick={() => {
+                    setMonth(today.slice(0, 7));
+                    setSelected(today);
+                  }}
+                >
+                  Today
+                </button>
+                <button
+                  className="icon-button"
+                  aria-label="Previous month"
+                  onClick={() => moveMonth(-1)}
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <button
+                  className="icon-button"
+                  aria-label="Next month"
+                  onClick={() => moveMonth(1)}
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            </div>
+            <div className="month-grid">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                <span className="day-label" key={day}>
+                  {day}
+                </span>
+              ))}
+              {days.map((date) => {
+                const tasks = calendarTasks.filter((t) => t.date === date);
+                return (
+                  <button
+                    className={`month-day ${date === selected ? 'selected' : ''} ${date.slice(0, 7) !== month ? 'outside' : ''}`}
+                    key={date}
+                    aria-label={`${date}, ${tasks.length} tasks`}
+                    aria-pressed={date === selected}
+                    onClick={() => setSelected(date)}
+                  >
+                    <span className={date === today ? 'is-today' : ''}>
+                      {Number(date.slice(-2))}
+                    </span>
+                    <div>
+                      {tasks.slice(0, 2).map((task) => (
+                        <small
+                          key={task.id}
+                          className={task.category === 'Preparation' ? 'prep' : ''}
+                        >
+                          {task.title}
+                        </small>
+                      ))}
+                      {tasks.length > 2 && <small>+{tasks.length - 2} more</small>}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
         <section className="panel day-panel">
           <div className="section-heading">
             <h2>{prettyDate(selected)} · your plan</h2>
@@ -309,6 +431,7 @@ export function Planner({
                     <input
                       type="checkbox"
                       checked={task.done}
+                      disabled={task.id.startsWith('rec-')}
                       onChange={() => toggle(task)}
                       aria-label={`Complete ${task.title}`}
                     />
@@ -319,32 +442,36 @@ export function Planner({
                     <span>
                       <strong>{task.title}</strong>
                       <span className={`badge ${task.pathwayId ? 'green' : ''}`}>
-                        {task.category}
+                        {task.id.startsWith('rec-')
+                          ? 'Weekly commitment · edit in School & Classes'
+                          : task.category}
                       </span>
                     </span>
                   </label>
-                  <div className="task-actions">
-                    <button
-                      className="icon-button"
-                      aria-label={`Edit ${task.title}`}
-                      onClick={() => setEditing(task)}
-                    >
-                      <Pencil size={15} />
-                    </button>
-                    <button
-                      className="icon-button"
-                      aria-label={`Delete ${task.title}`}
-                      onClick={() => {
-                        update((current) => ({
-                          ...current,
-                          tasks: current.tasks.filter((t) => t.id !== task.id),
-                        }));
-                        notify('Session removed. Its pathway step is still available.');
-                      }}
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
+                  {!task.id.startsWith('rec-') && (
+                    <div className="task-actions">
+                      <button
+                        className="icon-button"
+                        aria-label={`Edit ${task.title}`}
+                        onClick={() => setEditing(task)}
+                      >
+                        <Pencil size={15} />
+                      </button>
+                      <button
+                        className="icon-button"
+                        aria-label={`Delete ${task.title}`}
+                        onClick={() => {
+                          update((current) => ({
+                            ...current,
+                            tasks: current.tasks.filter((t) => t.id !== task.id),
+                          }));
+                          notify('Session removed. Its pathway step is still available.');
+                        }}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  )}
                 </article>
               ))}
             </div>
